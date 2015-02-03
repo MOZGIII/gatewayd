@@ -1,0 +1,4 @@
+# Go concurrency
+
+https://talks.golang.org/2012/concurrency.slide
+http://www.youtube.com/watch?v=f6kdp27TYZs
