@@ -1,9 +1,9 @@
-package backend
+package session
 
 import "testing"
 
 func TestReadWrite(t *testing.T) {
-	sm := NewSessionsManager()
+	sm := NewSessionManager()
 
 	session, err := sm.CreateSession("mykey")
 	if err != nil {

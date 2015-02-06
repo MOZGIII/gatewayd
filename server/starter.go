@@ -19,7 +19,7 @@ func Start(e config.ServerEndpoint, handler http.Handler) error {
 }
 
 // StartAll starts servers for both of the endpoints
-func StartAll(c *config.ConfigStruct) {
+func StartAll(c *config.Config) {
 	go func() {
 		if err := Start(c.PublicEndpoint, NewPublicHander()); err != nil {
 			log.Fatal(err)

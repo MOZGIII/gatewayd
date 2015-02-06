@@ -4,9 +4,11 @@ import (
 	"log"
 	"net/http"
 
-	"gatewayd/backend"
+	control "gatewayd/backend/control"
 	"gatewayd/tunnel"
 )
+
+// This will soon move out from the api package...
 
 // Tunnel is a handler that checks request for validity and then
 // calls tunnel.Handler to trigger tunnel
@@ -24,16 +26,12 @@ func Tunnel(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Printf("New connection with token %q", token)
+	log.Printf("New tunnel connection with token %q", token)
 
-	ansc := make(chan *backend.Session)
-	backend.Control.SyncChannel() <- func(sm *backend.SessionsManager) {
-		ansc <- sm.SessionByToken(token)
-	}
-	session := <-ansc
-
-	if session == nil {
+	_, err := control.FixmeContextExport().SessionManager.SessionByToken(token)
+	if err != nil {
 		log.Printf("Blocked access attempt with invalid token %q", token)
+		log.Println(err)
 		http.Error(rw, "Access denied", 403)
 		return
 	}

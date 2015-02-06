@@ -26,9 +26,9 @@ func NewPublicHander() http.Handler {
 func NewServiceHander() http.Handler {
 	m := buildMartini()
 
-	m.Post("/sessions/new", api.CreateSession)
-	m.Get("/sessions/key/:key", api.SessionByKey)
-	m.Get("/sessions/key/:token", api.SessionByToken)
+	// Sessions
+	m.Post("/sessions", api.CreateSession)
+	m.Get("/sessions/:token", api.SessionByToken)
 
 	return m
 }

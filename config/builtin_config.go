@@ -1,6 +1,6 @@
 package config
 
-var defaultConfig ConfigStruct = ConfigStruct{
+var defaultConfig = Config{
 	PublicEndpoint: ServerEndpoint{
 		Addr:        ":3000",
 		SSLEnabled:  false,
@@ -15,7 +15,7 @@ var defaultConfig ConfigStruct = ConfigStruct{
 	},
 }
 
-// LoadBuiltinConfig loads default bundled config
-func LoadBuiltinConfig() *ConfigStruct {
+// LoadBuiltinConfig loads default bundled config.
+func LoadBuiltinConfig() *Config {
 	return &defaultConfig
 }
