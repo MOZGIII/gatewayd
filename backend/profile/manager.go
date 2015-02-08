@@ -3,6 +3,8 @@ package profile
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"sync"
 )
@@ -12,7 +14,7 @@ import (
 // already been started and are referencing the profile:
 // we should either wipe out all the sessions, or block
 // any interaction with "locked" profile.
-// For now we just don't allow any interaction with
+// For now we just don't support any interaction with
 // profiles after they are loaded.
 
 // Manager stores profiles.
@@ -45,30 +47,34 @@ func (manager *Manager) register(profile *Profile) error {
 	return nil
 }
 
-// LoadJSON loads JSON files with a list of profiles.
-func (manager *Manager) LoadJSON(filename string) error {
-	reader, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer reader.Close()
-
+// LoadJSON loads profiles in JSON format from a reader.
+func (manager *Manager) LoadJSON(reader io.Reader) error {
 	dec := json.NewDecoder(reader)
 
 	var data struct {
-		profiles []*Profile
+		Profiles []*Profile `json:"profiles"`
 	}
 	if err := dec.Decode(&data); err != nil {
 		return err
 	}
 
-	for _, profile := range data.profiles {
+	for _, profile := range data.Profiles {
 		if err := manager.register(profile); err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+// LoadJSONFile loads profiles from a JSON file.
+func (manager *Manager) LoadJSONFile(filename string) error {
+	reader, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+	return manager.LoadJSON(reader)
 }
 
 // Get returns profile for given name.
@@ -82,4 +88,9 @@ func (manager *Manager) Get(name string) (*Profile, error) {
 	}
 
 	return profile, nil
+}
+
+// Report dumps info about the current state
+func (manager *Manager) Report() {
+	log.Println("profilemanager: report", manager.profileByName)
 }

@@ -5,11 +5,11 @@ import (
 	"log"
 	"net/http"
 
-	"gatewayd/backend/control"
+	"gatewayd/backend/global"
 	"gatewayd/backend/session"
 
+	"gatewayd/pkg/encoder"
 	"github.com/go-martini/martini"
-	"github.com/martini-contrib/encoder"
 )
 
 // API talks to session manager to get sessions.
@@ -21,15 +21,15 @@ func SessionByToken(params martini.Params, enc encoder.Encoder) (int, []byte) {
 	if !ok {
 		return http.StatusBadRequest, []byte("No token passed")
 	}
-	log.Printf("Requesting session info for token %q", token)
+	log.Printf("api: requesting session info for token %q", token)
 
-	_, err := control.FixmeContextExport().SessionManager.SessionByToken(token)
+	_, err := global.SessionManager.SessionByToken(token)
 	if err != nil {
-		log.Println("Requested session not found with token", token)
 		log.Println(err)
 		return http.StatusNotFound, []byte("No such session")
 	}
 
+	// FIXME: add something useful here
 	info := struct {
 		Status string `json:"tmp_status"`
 	}{"online"}
@@ -50,17 +50,29 @@ func CreateSession(params martini.Params, enc encoder.Encoder, req *http.Request
 		log.Println(err)
 		return http.StatusBadRequest, []byte("Wrong request")
 	}
-	log.Println("Creating session for request", t)
+	log.Println("api: creating session for request", t)
 
-	session := session.New(nil, nil)
-
-	token, err := control.FixmeContextExport().SessionManager.Register(session)
+	profile, err := global.ProfileManager.Get(t.ProfileName)
 	if err != nil {
-		session.Terminate()
+		log.Println(err)
+		return http.StatusInternalServerError, []byte("Unable to locate profile")
+	}
+
+	session, err := session.Create(profile)
+	if err != nil {
 		log.Println(err)
 		return http.StatusInternalServerError, []byte("Unable to create session")
 	}
-	log.Printf("Session created and registered (token %q)", token)
+
+	token, err := global.SessionManager.Manage(session)
+	if err != nil {
+		log.Println(err)
+		return http.StatusInternalServerError, []byte("Unable to register session")
+	}
+
+	log.Printf("api: session created and registered (token %q)", token)
+
+	go session.Run()
 
 	result := struct {
 		Token string `json:"token"`

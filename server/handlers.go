@@ -5,10 +5,10 @@ import (
 	"strconv"
 
 	"gatewayd/api"
-	// "gatewayd/tunnel"
+	"gatewayd/tunnel"
 
+	"gatewayd/pkg/encoder"
 	"github.com/go-martini/martini"
-	"github.com/martini-contrib/encoder"
 )
 
 // NewPublicHander creates a handler with public-faced services
@@ -16,7 +16,7 @@ import (
 func NewPublicHander() http.Handler {
 	handler := http.NewServeMux()
 
-	handler.HandleFunc("/tunnel", api.Tunnel)
+	handler.HandleFunc("/tunnel", tunnel.Handler)
 
 	return handler
 }
@@ -43,7 +43,7 @@ func buildMartini() *martini.ClassicMartini {
 	// Map encoder conditionally based on pretty print request param
 	m.Use(func(c martini.Context, w http.ResponseWriter, r *http.Request) {
 		pretty, _ := strconv.ParseBool(r.URL.Query().Get("pretty"))
-		c.MapTo(encoder.JsonEncoder{PrettyPrint: pretty}, (*encoder.Encoder)(nil))
+		c.MapTo(encoder.JSONEncoder{PrettyPrint: pretty}, (*encoder.Encoder)(nil))
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	})
 

@@ -1,9 +1,6 @@
 package session
 
 import (
-	"log"
-
-	// "gatewayd/backend/control"
 	"gatewayd/backend/profile"
 	"gatewayd/driver"
 )
@@ -14,10 +11,10 @@ type Session struct {
 	profile *profile.Profile // profile defines session settings
 	driver  driver.Driver    // driver does the actual work
 
-	terminateChannel chan struct{}
+	terminate chan struct{}
 }
 
-// New creates a new session.
+// New makes a new session struct.
 func New(profile *profile.Profile, driver driver.Driver) *Session {
 	return &Session{
 		profile, driver,
@@ -25,15 +22,25 @@ func New(profile *profile.Profile, driver driver.Driver) *Session {
 	}
 }
 
-// Terminate can be called to terminate this session.
-func (s *Session) Terminate() {
-	close(s.terminateChannel)
+// Create makes new session by profile specification.
+func Create(profile *profile.Profile) (*Session, error) {
+	driver, err := driver.CreateByName(profile.DriverName)
+	if err != nil {
+		return nil, err
+	}
+	session := New(profile, driver)
+	if err := driver.Assign(session); err != nil {
+		return nil, err
+	}
+	return session, nil
 }
 
-func (s *Session) run() {
-	select {
-	case <-s.terminateChannel:
-		log.Printf("Session %v is terminating", s)
-		return
-	}
+// Driver returns session driver.
+func (s *Session) Driver() driver.Driver {
+	return s.driver
+}
+
+// Terminate can be called to terminate this session.
+func (s *Session) Terminate() {
+	close(s.terminate)
 }

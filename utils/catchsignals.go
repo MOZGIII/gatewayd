@@ -16,11 +16,11 @@ func CatchSignals(quit chan<- struct{}) {
 
 	timeout := 15 * time.Second
 
-	log.Printf("Captured %v, exiting (force exit in %s)...", sig, timeout)
+	log.Printf("utils: captured %v, exiting (force exit in %s)...", sig, timeout)
 
 	go func() {
 		time.Sleep(timeout)
-		log.Printf("Passed %s, force exit...", timeout)
+		log.Printf("utils: passed %s, force exit...", timeout)
 		os.Exit(1)
 	}()
 
