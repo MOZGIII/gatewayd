@@ -11,13 +11,6 @@ func (s *Session) Run() {
 	log.Printf("session: goroutine started for %v", s)
 	defer log.Printf("session: goroutine finished for %v", s)
 
-	// Before routine starts
-	if err := s.routineInit(); err != nil {
-		log.Println(err)
-		log.Printf("session: unable to start session %v", s)
-		return
-	}
-
 	// After routine ends
 	defer func() {
 		// Call all internal cleanup
@@ -30,6 +23,13 @@ func (s *Session) Run() {
 		// Trigger all external cleanup
 		close(s.terminate)
 	}()
+
+	// Before routine starts
+	if err := s.routineInit(); err != nil {
+		log.Println(err)
+		log.Printf("session: unable to start session %v", s)
+		return
+	}
 
 	if err := s.routineMainloop(); err != nil {
 		log.Println(err)
