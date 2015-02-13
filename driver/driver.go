@@ -4,8 +4,6 @@ import (
 	"net"
 
 	"gatewayd/driver/state"
-
-	"gatewayd/backend/abstract"
 )
 
 // Driver represnts an object capable of starting and managing
@@ -14,7 +12,7 @@ import (
 // to: i.e. X and VNC server in LXC environment or KVM virtual
 // machine with VNC display.
 type Driver interface {
-	Assign(session abstract.Session) error // assigns session to a driver
+	Assign(session Session) error // assigns session to a driver
 
 	Start() error                    // starts session
 	Terminate() error                // terminates session (force kick user out)

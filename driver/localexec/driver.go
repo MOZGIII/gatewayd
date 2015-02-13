@@ -8,12 +8,10 @@ import (
 
 	"gatewayd/driver"
 	"gatewayd/driver/state"
-
-	"gatewayd/backend/abstract"
 )
 
 type localExecDriver struct {
-	session      abstract.Session
+	session      driver.Session
 	state        state.Type
 	stateChanged chan state.Type
 }
@@ -31,7 +29,7 @@ func init() {
 	driver.FactoryRegister("localexec", NewLocalExecDriver)
 }
 
-func (l *localExecDriver) Assign(session abstract.Session) error {
+func (l *localExecDriver) Assign(session driver.Session) error {
 	if l.session != nil {
 		fmt.Errorf("localexec: session already assigned")
 	}
