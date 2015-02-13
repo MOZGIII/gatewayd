@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"time"
+	"os/exec"
 
 	"gatewayd/driver"
 	"gatewayd/driver/state"
@@ -14,6 +14,9 @@ type localExecDriver struct {
 	session      driver.Session
 	state        state.Type
 	stateChanged chan state.Type
+
+	cmd       *exec.Cmd
+	localport int
 }
 
 // NewLocalExecDriver is a factory function to create new driver.
@@ -21,7 +24,10 @@ func NewLocalExecDriver() driver.Driver {
 	return &localExecDriver{
 		nil,
 		state.Stopped,
-		make(chan state.Type),
+		make(chan state.Type, 1),
+
+		nil,
+		0,
 	}
 }
 
@@ -31,32 +37,40 @@ func init() {
 
 func (l *localExecDriver) Assign(session driver.Session) error {
 	if l.session != nil {
-		fmt.Errorf("localexec: session already assigned")
+		return fmt.Errorf("localexec: session already assigned")
 	}
 
 	l.session = session
+	l.initCommandFromSession()
+
+	return nil
+}
+
+func (l *localExecDriver) initCommandFromSession() error {
+	if l.session == nil {
+		return fmt.Errorf("localexec: unable to init command with nil session")
+	}
+
+	l.cmd = exec.Command("gatewayd-session-test")
+	l.localport = 6500
+
 	return nil
 }
 
 func (l *localExecDriver) Start() error {
-	log.Println("localexec: start mock!")
+	if err := l.cmd.Start(); err != nil {
+		l.stateChanged <- state.Stopped
+		return err
+	}
+	log.Println("localexec: session process started")
 
-	// Simulate session being started and stopped
 	go func() {
-		{
-			t := 200 * time.Millisecond
-			log.Printf("localexec: mock will boot up in %s", t)
-			time.Sleep(t)
+		if err := l.cmd.Wait(); err != nil {
+			log.Println(err)
+			log.Printf("localexec: session process terminated abnormally")
 		}
-		log.Printf("localexec: mock booted up")
-		l.stateChanged <- state.Started
 
-		{
-			t := 5000 * time.Millisecond
-			log.Printf("localexec: mock will shutdown in %s", t)
-			time.Sleep(t)
-		}
-		log.Printf("localexec: mock shutdown")
+		log.Printf("localexec: session process stopped")
 		l.stateChanged <- state.Stopped
 	}()
 
@@ -72,11 +86,19 @@ func (l *localExecDriver) StateChanged() <-chan state.Type {
 }
 
 func (l *localExecDriver) Terminate() error {
-	log.Println("localexec: terminate mock!")
+	if l.cmd.Process == nil {
+		// return fmt.Errorf("localexec: unable to kill, proccess in nil")
+		return nil // proccess already dead
+	}
+
+	// Kill triggers proccess exit, result will be propagated to Wait call.
+	if err := l.cmd.Process.Kill(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (l *localExecDriver) RemoteVNCConnection() (net.Conn, error) {
-	log.Println("localexec: RemoteVNCConnection mock!")
-	return net.Dial("tcp", "127.0.0.1:6900")
+	addr := fmt.Sprintf("127.0.0.1:%d", l.localport)
+	return net.Dial("tcp", addr)
 }
