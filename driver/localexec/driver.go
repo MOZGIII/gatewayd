@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os/exec"
+	"sync"
 
 	"gatewayd/driver"
 	"gatewayd/driver/state"
@@ -17,6 +18,8 @@ type localExecDriver struct {
 
 	cmd       *exec.Cmd
 	localport int
+
+	mu sync.Mutex
 }
 
 // NewLocalExecDriver is a factory function to create new driver.
@@ -28,6 +31,8 @@ func NewLocalExecDriver() driver.Driver {
 
 		nil,
 		0,
+
+		sync.Mutex{},
 	}
 }
 
@@ -52,29 +57,44 @@ func (l *localExecDriver) initCommandFromSession() error {
 	}
 
 	l.cmd = exec.Command("gatewayd-session-test")
-	l.localport = 6500
+	l.localport = 6500 // mock implementation
 
 	return nil
 }
 
 func (l *localExecDriver) Start() error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
 	if err := l.cmd.Start(); err != nil {
-		l.stateChanged <- state.Stopped
+		l.changeState(state.Stopped)
 		return err
 	}
 	log.Println("localexec: session process started")
+	l.changeState(state.Started)
 
 	go func() {
+		// Wait for proccess to end.
 		if err := l.cmd.Wait(); err != nil {
 			log.Println(err)
 			log.Printf("localexec: session process terminated abnormally")
 		}
 
+		// Lock further operations until done.
+		l.mu.Lock()
+		defer l.mu.Unlock()
+
+		// Update the state.
 		log.Printf("localexec: session process stopped")
-		l.stateChanged <- state.Stopped
+		l.changeState(state.Stopped)
 	}()
 
 	return nil
+}
+
+func (l *localExecDriver) changeState(newState state.Type) {
+	l.state = newState
+	l.stateChanged <- newState
 }
 
 func (l *localExecDriver) State() state.Type {
@@ -86,9 +106,14 @@ func (l *localExecDriver) StateChanged() <-chan state.Type {
 }
 
 func (l *localExecDriver) Terminate() error {
-	if l.cmd.Process == nil {
-		// return fmt.Errorf("localexec: unable to kill, proccess in nil")
-		return nil // proccess already dead
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	log.Printf("localexec: terminate called")
+
+	// Can terminate if process is already stopped
+	if l.state == state.Stopped {
+		return nil
 	}
 
 	// Kill triggers proccess exit, result will be propagated to Wait call.
