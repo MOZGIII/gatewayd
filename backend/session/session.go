@@ -11,7 +11,7 @@ type Session struct {
 	profile *profile.Profile // profile defines session settings
 	driver  driver.Driver    // driver does the actual work
 
-	terminate chan struct{}
+	donech chan struct{}
 }
 
 // New makes a new session struct.
@@ -38,9 +38,4 @@ func Create(profile *profile.Profile) (*Session, error) {
 // Driver returns session driver.
 func (s *Session) Driver() driver.Driver {
 	return s.driver
-}
-
-// Terminate can be called to terminate this session.
-func (s *Session) Terminate() {
-	close(s.terminate)
 }

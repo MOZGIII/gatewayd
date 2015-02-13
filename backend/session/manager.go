@@ -51,7 +51,7 @@ func (s *Manager) Unregister(session *Session) error {
 func (s *Manager) unregisterOnTerminate(session *Session) {
 	log.Printf("sessionmanager: session termination watchdog for session %v started", session)
 	defer log.Printf("sessionmanager: session termination watchdog for session %v finished", session)
-	<-session.terminate
+	<-session.donech
 	s.Unregister(session)
 	log.Printf("sessionmanager: session %v unregistered", session)
 }
