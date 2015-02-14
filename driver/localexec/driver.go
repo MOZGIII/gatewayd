@@ -15,8 +15,9 @@ type localExecDriver struct {
 	state        state.Type
 	stateChanged chan state.Type
 
-	cmd       *exec.Cmd
-	localport int
+	cmd     *exec.Cmd
+	vnchost string
+	vncport int
 
 	termch chan (chan error)
 }
@@ -29,6 +30,7 @@ func NewLocalExecDriver() driver.Driver {
 		make(chan state.Type),
 
 		nil,
+		"",
 		0,
 
 		make(chan (chan error)),
@@ -80,7 +82,7 @@ func (l *localExecDriver) StateChanged() <-chan state.Type {
 }
 
 func (l *localExecDriver) RemoteVNCConnection() (net.Conn, error) {
-	addr := fmt.Sprintf("127.0.0.1:%d", l.localport)
+	addr := fmt.Sprintf("%s:%d", l.vnchost, l.vncport)
 	return net.Dial("tcp", addr)
 }
 
@@ -90,7 +92,8 @@ func (l *localExecDriver) initCommandFromSession() error {
 	}
 
 	l.cmd = exec.Command("gatewayd-session-test")
-	l.localport = 6500 // mock implementation
+	l.vnchost = "127.0.0.1" // mock implementation, should read from profile or sth
+	l.vncport = 6900        // mock implementation
 
 	return nil
 }
