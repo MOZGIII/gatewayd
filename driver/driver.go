@@ -14,8 +14,11 @@ import (
 type Driver interface {
 	Assign(session Session) error // assigns session to a driver
 
-	Start() error                    // starts session
-	Terminate() error                // terminates session (force kick user out)
+	// Actions
+	Start() error     // starts session (probably should run driver's goroutine)
+	Terminate() error // terminates session (force stops the session)
+
+	// State machine
 	State() state.Type               // the actual state of the driver for this session
 	StateChanged() <-chan state.Type // channel to get the updates from the driver
 
