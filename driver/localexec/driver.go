@@ -1,10 +1,13 @@
 package localexec
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os/exec"
+	"sync"
 
 	"gatewayd/driver"
 	"gatewayd/driver/state"
@@ -15,9 +18,10 @@ type localExecDriver struct {
 	state        state.Type
 	stateChanged chan state.Type
 
-	cmd     *exec.Cmd
-	vnchost string
-	vncport int
+	cmd *exec.Cmd
+
+	vncaddr   string       // stores VNC address
+	vncaddrmu sync.RWMutex // guards access to VNC address
 
 	termch chan (chan error)
 }
@@ -29,9 +33,10 @@ func NewLocalExecDriver() driver.Driver {
 		state.Init,
 		make(chan state.Type),
 
-		nil,
-		"",
-		0,
+		nil, // cmd
+
+		"",             // vncaddr
+		sync.RWMutex{}, // vncaddrmu
 
 		make(chan (chan error)),
 	}
@@ -82,8 +87,14 @@ func (l *localExecDriver) StateChanged() <-chan state.Type {
 }
 
 func (l *localExecDriver) RemoteVNCConnection() (net.Conn, error) {
-	addr := fmt.Sprintf("%s:%d", l.vnchost, l.vncport)
-	return net.Dial("tcp", addr)
+	l.vncaddrmu.RLock()
+	defer l.vncaddrmu.RUnlock()
+
+	if l.vncaddr == "" {
+		return nil, fmt.Errorf("localexec: VNC connection address in not known yet")
+	}
+
+	return net.Dial("tcp", l.vncaddr)
 }
 
 func (l *localExecDriver) initCommandFromSession() error {
@@ -92,8 +103,6 @@ func (l *localExecDriver) initCommandFromSession() error {
 	}
 
 	l.cmd = exec.Command("gatewayd-session-test")
-	l.vnchost = "127.0.0.1" // mock implementation, should read from profile or sth
-	l.vncport = 6900        // mock implementation
 
 	return nil
 }
@@ -103,9 +112,20 @@ func (l *localExecDriver) run() {
 	log.Printf("localexec: goroutine started for %v", l)
 	defer log.Printf("localexec: goroutine finished for %v", l)
 
+	// Begin by switching state to starting.
 	log.Println("localexec: session process starting")
 	l.changeState(state.Starting)
 
+	// Hook stdout.
+	stdout, err := l.cmd.StdoutPipe()
+	if err != nil {
+		log.Println(err)
+		log.Println("localexec: unable to hook stdout")
+		l.changeState(state.Stopped)
+		return
+	}
+
+	// Start process.
 	if err := l.cmd.Start(); err != nil {
 		log.Println(err)
 		log.Println("localexec: session process was unable to start")
@@ -113,6 +133,15 @@ func (l *localExecDriver) run() {
 		return
 	}
 
+	// Read VNC address from process' stdout.
+	if err := l.readVNCAddress(stdout); err != nil {
+		log.Println(err)
+		log.Println("localexec: unable to get VNC address from child proccess")
+		l.changeState(state.Stopped)
+		return
+	}
+
+	// Switch state to started now.
 	log.Println("localexec: session process started")
 	l.changeState(state.Started)
 
@@ -173,4 +202,25 @@ func (l *localExecDriver) changeState(newState state.Type) {
 	log.Printf("localexec: pushing new state %q", newState)
 	l.stateChanged <- newState
 	log.Printf("localexec: new state pushed %q", newState)
+}
+
+func (l *localExecDriver) readVNCAddress(r io.Reader) error {
+	l.vncaddrmu.Lock()
+	defer l.vncaddrmu.Unlock()
+
+	if l.vncaddr != "" {
+		return fmt.Errorf("localexec: VNC address already set to %q for %v", l.vncaddr, l)
+	}
+
+	var address struct {
+		Address string `json:"address"`
+	}
+	if err := json.NewDecoder(r).Decode(&address); err != nil {
+		return err
+	}
+
+	l.vncaddr = address.Address
+	log.Printf("localexec: VNC address %q fetched for %v", l.vncaddr, l)
+
+	return nil
 }
