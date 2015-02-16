@@ -29,7 +29,7 @@ func main() {
 				"driver": "localexec",
 				"params": {
 					"command": {
-						"name": "gateway-session-test",
+						"name": "gatewayd-session-test",
 						"args": ["test"]
 					}
 				}
