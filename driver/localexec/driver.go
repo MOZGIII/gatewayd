@@ -11,6 +11,8 @@ import (
 
 	"gatewayd/driver"
 	"gatewayd/driver/state"
+
+	"github.com/jmoiron/jsonq"
 )
 
 type localExecDriver struct {
@@ -56,7 +58,9 @@ func (l *localExecDriver) Assign(session driver.Session) error {
 	}
 
 	l.session = session
-	l.initCommandFromSession()
+	if err := l.initCommandFromSession(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -102,8 +106,28 @@ func (l *localExecDriver) initCommandFromSession() error {
 		return fmt.Errorf("localexec: unable to init command with nil session")
 	}
 
-	l.cmd = exec.Command("gatewayd-session-test")
+	// Fetch all the values first
+	jq := jsonq.NewQuery(l.session.Profile().GetParams())
+	name, err := jq.String("command", "name")
+	if err != nil {
+		return err
+	}
+	args, err := jq.ArrayOfStrings("command", "args")
+	if err != nil {
+		return err
+	}
 
+	// Sanity checks
+	if name == "" {
+		return fmt.Errorf("localexec: profile param error: empty command")
+	}
+
+	l.cmd = exec.Command(name)
+	if args != nil && len(args) > 0 {
+		l.cmd.Args = append(l.cmd.Args, args...)
+	}
+
+	log.Printf("localexec: session assigned with command %v", l.cmd)
 	return nil
 }
 

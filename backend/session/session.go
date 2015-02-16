@@ -39,3 +39,8 @@ func Create(profile *profile.Profile) (*Session, error) {
 func (s *Session) Driver() driver.Driver {
 	return s.driver
 }
+
+// Profile returns session profile.
+func (s *Session) Profile() *profile.Profile {
+	return s.profile
+}

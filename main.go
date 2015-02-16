@@ -28,7 +28,10 @@ func main() {
 				"name": "test",
 				"driver": "localexec",
 				"params": {
-					"uid": "gwtest"
+					"command": {
+						"name": "gateway-session-test",
+						"args": ["test"]
+					}
 				}
 			}
 		]
