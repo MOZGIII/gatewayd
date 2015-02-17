@@ -25,11 +25,12 @@ func (s *Session) Run() {
 	}
 
 	// Now react to state changes in a loop.
+loop:
 	for newState := range s.driver.StateChanged() {
 		log.Printf("session: driver reported state change to %q (session %v)", newState, s)
 		switch newState {
 		case state.Stopped:
-			break // driver stopped, we're done
+			break loop // driver stopped, we're done
 		}
 	}
 }
