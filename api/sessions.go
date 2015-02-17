@@ -23,16 +23,19 @@ func SessionByToken(params martini.Params, enc encoder.Encoder) (int, []byte) {
 	}
 	log.Printf("api: requesting session info for token %q", token)
 
-	_, err := global.SessionManager.SessionByToken(token)
+	session, err := global.SessionManager.SessionByToken(token)
 	if err != nil {
 		log.Println(err)
 		return http.StatusNotFound, []byte("No such session")
 	}
 
-	// FIXME: add something useful here
 	info := struct {
-		Status string `json:"tmp_status"`
-	}{"online"}
+		State       string `json:"state"`
+		ProfileName string `json:"profile"`
+	}{
+		session.Driver().State().String(),
+		session.Profile().Name,
+	}
 	return http.StatusOK, encoder.Must(enc.Encode(info))
 }
 
