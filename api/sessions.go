@@ -82,3 +82,30 @@ func CreateSession(params martini.Params, enc encoder.Encoder, req *http.Request
 	}{token}
 	return http.StatusCreated, encoder.Must(enc.Encode(result))
 }
+
+// DeleteSession terminates specified session.
+func DeleteSession(params martini.Params, enc encoder.Encoder) (int, []byte) {
+	token, ok := params["token"]
+	if !ok {
+		return http.StatusBadRequest, []byte("No token passed")
+	}
+	log.Printf("api: requesting session deletion for token %q", token)
+
+	session, err := global.SessionManager.SessionByToken(token)
+	if err != nil {
+		log.Println(err)
+		return http.StatusNotFound, []byte("No such session")
+	}
+
+	if err := session.Driver().Terminate(); err != nil {
+		log.Println(err)
+		return http.StatusInternalServerError, []byte("Unable to terminate session")
+	}
+
+	info := struct {
+		Status string `json:"status"`
+	}{
+		"ok",
+	}
+	return http.StatusOK, encoder.Must(enc.Encode(info))
+}

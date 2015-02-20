@@ -29,6 +29,7 @@ func NewServiceHander() http.Handler {
 	// Sessions
 	m.Post("/sessions", api.CreateSession)
 	m.Get("/sessions/:token", api.SessionByToken)
+	m.Delete("/sessions/:token", api.DeleteSession)
 
 	return m
 }
