@@ -21,7 +21,7 @@ func (p *Profile) GetParam(key string) (interface{}, error) {
 	return val, nil
 }
 
-// Params return param
+// GetParams return param
 func (p *Profile) GetParams() map[string]interface{} {
 	return p.Params
 }
