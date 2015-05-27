@@ -31,11 +31,11 @@ func LoadConfig(filename string) (*Config, error) {
 
 	decoder := json.NewDecoder(reader)
 
-	var config *Config
-	if err := decoder.Decode(config); err != nil {
+	var config Config
+	if err := decoder.Decode(&config); err != nil {
 		return nil, err
 	}
-	return config, nil
+	return &config, nil
 }
 
 // MustLoadConfig calls LoadConfig and makes it a must-success
