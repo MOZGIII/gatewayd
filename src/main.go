@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	configFile   = flag.String("config", "config.json", "path to config.json")
-	profilesFile = flag.String("profiles", "profiles.json", "path to profiles.json")
+	configFile   = flag.String("config", "", "path to config.json")
+	profilesFile = flag.String("profiles", "", "path to profiles.json")
 )
 
 func checkArgs() {
