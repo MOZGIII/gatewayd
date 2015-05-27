@@ -1,29 +1,50 @@
 package main
 
 import (
+	"flag"
+	// "fmt"
 	"log"
+	"os"
 
 	"gatewayd/driver"
 
 	"gatewayd/backend/control"
 	"gatewayd/backend/global"
-	_ "gatewayd/config"
+	"gatewayd/config"
 	"gatewayd/server"
 	"gatewayd/utils"
 
 	_ "gatewayd/driver/localexec"
-
-	"gatewayd/defaultconfigs"
 )
 
+var (
+	configFile   = flag.String("config", "config.json", "path to config.json")
+	profilesFile = flag.String("profiles", "profiles.json", "path to profiles.json")
+)
+
+func checkArgs() {
+	if *configFile == "" || *profilesFile == "" {
+		flag.Usage()
+		os.Exit(2)
+	}
+}
+
 func main() {
+	flag.Parse()
+	checkArgs()
+
 	log.Printf("main: registered drivers: %v", driver.Registry())
 
 	log.Println("main: loading config...")
-	cfg := defaultconfigs.GetConfig()
+	cfg, err := config.LoadConfig(*configFile)
+	if err != nil {
+		log.Fatalf("main: unable to load config: %s", err)
+	}
 
 	log.Println("main: loading profiles...")
-	global.ProfileManager.LoadJSON(defaultconfigs.GetProfileJSON())
+	if err := global.ProfileManager.LoadJSONFile(*profilesFile); err != nil {
+		log.Fatalf("main: unable to load profiles: %s", err)
+	}
 	global.ProfileManager.Report()
 
 	go func() {

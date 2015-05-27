@@ -1,0 +1,14 @@
+{
+  "profiles": [
+    {
+      "name": "test",
+      "driver": "localexec",
+      "params": {
+        "command": {
+          "name": "gatewayd-session-test",
+          "args": ["test"]
+        }
+      }
+    }
+  ]
+}

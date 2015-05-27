@@ -1,0 +1,14 @@
+{
+  "public_endpoint": {
+    "addr":        ":3000",
+    "ssl_enabled":  false,
+    "ssl_keyfile":  "public.key",
+    "ssl_certfile": "public.crt"
+  },
+  "service_endpoint": {
+    "addr":        ":3001",
+    "ssl_enabled":  false,
+    "ssl_keyfile":  "service.key",
+    "ssl_certfile": "service.crt"
+  }
+}
