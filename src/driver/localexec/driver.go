@@ -67,7 +67,7 @@ func (l *localExecDriver) Assign(session driver.Session) error {
 
 func (l *localExecDriver) Start() error {
 	if l.state != state.Init {
-		return fmt.Errorf("localexec: unable to start a session the is in %q state", l.state)
+		return fmt.Errorf("localexec: unable to start session that is in %q state", l.state)
 	}
 
 	go l.run()
