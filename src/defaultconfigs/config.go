@@ -1,13 +1,17 @@
-package config
+package defaultconfigs
 
-var defaultConfig = Config{
-	PublicEndpoint: ServerEndpoint{
+import (
+	"gatewayd/config"
+)
+
+var defaultConfig = config.Config{
+	PublicEndpoint: config.ServerEndpoint{
 		Addr:        ":3000",
 		SSLEnabled:  false,
 		SSLKeyFile:  "public.key",
 		SSLCertFile: "public.crt",
 	},
-	ServiceEndpoint: ServerEndpoint{
+	ServiceEndpoint: config.ServerEndpoint{
 		Addr:        ":3001",
 		SSLEnabled:  false,
 		SSLKeyFile:  "service.key",
@@ -15,7 +19,7 @@ var defaultConfig = Config{
 	},
 }
 
-// LoadBuiltinConfig loads default bundled config.
-func LoadBuiltinConfig() *Config {
+// GetConfig loads default bundled config.
+func GetConfig() *config.Config {
 	return &defaultConfig
 }

@@ -2,40 +2,28 @@ package main
 
 import (
 	"log"
-	"strings"
 
 	"gatewayd/driver"
 
 	"gatewayd/backend/control"
 	"gatewayd/backend/global"
-	"gatewayd/config"
+	_ "gatewayd/config"
 	"gatewayd/server"
 	"gatewayd/utils"
 
 	_ "gatewayd/driver/localexec"
+
+	"gatewayd/defaultconfigs"
 )
 
 func main() {
 	log.Printf("main: registered drivers: %v", driver.Registry())
 
 	log.Println("main: loading config...")
-	cfg := config.LoadBuiltinConfig()
+	cfg := defaultconfigs.GetConfig()
 
 	log.Println("main: loading profiles...")
-	global.ProfileManager.LoadJSON(strings.NewReader(`{
-		"profiles": [
-			{
-				"name": "test",
-				"driver": "localexec",
-				"params": {
-					"command": {
-						"name": "gatewayd-session-test",
-						"args": ["test"]
-					}
-				}
-			}
-		]
-	}`))
+	global.ProfileManager.LoadJSON(defaultconfigs.GetProfileJSON())
 	global.ProfileManager.Report()
 
 	go func() {
