@@ -20,6 +20,8 @@ import (
 var (
 	configFile   = flag.String("config", "", "path to config.json")
 	profilesFile = flag.String("profiles", "", "path to profiles.json")
+
+	currentConfig *config.Config
 )
 
 func checkArgs() {
@@ -29,14 +31,10 @@ func checkArgs() {
 	}
 }
 
-func main() {
-	flag.Parse()
-	checkArgs()
-
-	log.Printf("main: registered drivers: %v", driver.Registry())
-
+func loadConfiguration() {
 	log.Println("main: loading config...")
-	cfg, err := config.LoadConfig(*configFile)
+	var err error
+	currentConfig, err = config.LoadConfig(*configFile)
 	if err != nil {
 		log.Fatalf("main: unable to load config: %s", err)
 	}
@@ -45,6 +43,19 @@ func main() {
 	if err := global.ProfileManager.LoadJSONFile(*profilesFile); err != nil {
 		log.Fatalf("main: unable to load profiles: %s", err)
 	}
+}
+
+func main() {
+	flag.Parse()
+	checkArgs()
+
+	// Print available drivers
+	log.Printf("main: registered drivers: %v", driver.Registry())
+
+	// Load external configuration files
+	loadConfiguration()
+
+	// Report on loaded profiles
 	global.ProfileManager.Report()
 
 	go func() {
@@ -54,7 +65,7 @@ func main() {
 
 	go func() {
 		log.Println("main: starting servers...")
-		server.StartAll(cfg)
+		server.StartAll(currentConfig)
 	}()
 
 	// Control routine as "main thread".
