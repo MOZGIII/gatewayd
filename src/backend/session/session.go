@@ -12,7 +12,7 @@ type Session struct {
 	driver  driver.Driver     // driver does the actual work
 	params  map[string]string // params are passed on session creation
 
-	donech chan struct{}
+	donech chan struct{} // used by session manager to unregister session
 }
 
 // New makes a new session struct.
