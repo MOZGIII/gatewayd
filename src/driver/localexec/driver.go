@@ -175,8 +175,7 @@ loop:
 		// the loop. We no longer need to listen to events for it.
 		case err := <-waitch:
 			if err != nil {
-				log.Println(err)
-				log.Printf("localexec: session process terminated abnormally")
+				log.Printf("localexec: session process terminated abnormally: %s", err)
 			}
 			break loop
 
