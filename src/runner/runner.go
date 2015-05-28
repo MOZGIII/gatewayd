@@ -9,7 +9,7 @@ import (
 // Runner runs and manages runables.
 type Runner interface {
 	Go(runable Runable) error // executes runable in a separate goroutine
-	TerminateAll()            // send all amanged runables signal to terminate
+	TerminateAll()            // send all maanged runables command to terminate
 	Wait()                    // executes when all runables are finished execution
 }
 
