@@ -143,24 +143,21 @@ func (l *localExecDriver) run() {
 	// Hook stdout.
 	stdout, err := l.cmd.StdoutPipe()
 	if err != nil {
-		log.Println(err)
-		log.Println("localexec: unable to hook stdout")
+		log.Printf("localexec: unable to hook stdout: %s", err)
 		l.changeState(state.Stopped)
 		return
 	}
 
 	// Start process.
 	if err := l.cmd.Start(); err != nil {
-		log.Println(err)
-		log.Println("localexec: session process was unable to start")
+		log.Printf("localexec: session process was unable to start: %s", err)
 		l.changeState(state.Stopped)
 		return
 	}
 
 	// Read VNC address from process' stdout.
 	if err := l.readVNCAddress(stdout); err != nil {
-		log.Println(err)
-		log.Println("localexec: unable to get VNC address from child proccess")
+		log.Printf("localexec: unable to get VNC address from child proccess: %s", err)
 		l.changeState(state.Stopped)
 		return
 	}
