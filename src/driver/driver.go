@@ -15,8 +15,8 @@ type Driver interface {
 	Assign(session Session) error // assigns session to a driver
 
 	// Actions
-	Start() error     // starts session (probably should run driver's goroutine)
-	Terminate() error // terminates session (force stops the session)
+	Start() error            // starts session (probably should run driver's goroutine)
+	Terminate() <-chan error // terminates session (force stops the session)
 
 	// State machine
 	State() state.Type               // the actual state of the driver for this session

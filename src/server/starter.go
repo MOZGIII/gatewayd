@@ -18,15 +18,18 @@ func Start(e config.ServerEndpoint, handler http.Handler) error {
 	return server.ListenAndServe()
 }
 
-// StartAll starts servers for both of the endpoints
-func StartAll(c *config.Config) {
+// RunAll starts servers for both of the endpoints,
+// each in separate goroutines.
+func RunAll(c *config.Config) {
 	go func() {
 		if err := Start(c.PublicEndpoint, NewPublicHander()); err != nil {
 			log.Fatal(err)
 		}
 	}()
 
-	if err := Start(c.ServiceEndpoint, NewServiceHander()); err != nil {
-		log.Fatal(err)
-	}
+	go func() {
+		if err := Start(c.ServiceEndpoint, NewServiceHander()); err != nil {
+			log.Fatal(err)
+		}
+	}()
 }

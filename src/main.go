@@ -2,13 +2,11 @@ package main
 
 import (
 	"flag"
-	// "fmt"
 	"log"
 	"os"
 
 	"gatewayd/driver"
 
-	"gatewayd/backend/control"
 	"gatewayd/backend/global"
 	"gatewayd/config"
 	"gatewayd/server"
@@ -49,28 +47,30 @@ func main() {
 	flag.Parse()
 	checkArgs()
 
-	// Print available drivers
+	// Print available drivers.
 	log.Printf("main: registered drivers: %v", driver.Registry())
 
-	// Load external configuration files
+	// Load external configuration files.
 	loadConfiguration()
 
-	// Report on loaded profiles
+	// Report on loaded profiles.
 	global.ProfileManager.Report()
 
-	go func() {
-		log.Println("main: starting singals catcher...")
-		utils.CatchSignals(control.Control.Quit())
-	}()
+	log.Println("main: starting servers...")
+	server.RunAll(currentConfig)
 
-	go func() {
-		log.Println("main: starting servers...")
-		server.StartAll(currentConfig)
-	}()
+	// Quit channel is used to handle graceful shutdowns.
+	quitch := make(chan struct{})
 
-	// Control routine as "main thread".
-	log.Println("main: starting control...")
-	control.Control.Run()
+	log.Println("main: starting singals catcher...")
+	go utils.CatchSignals(quitch)
+
+	// Continue only if asked to exit.
+	<-quitch
+
+	// Make sure all runables quit gracefully.
+	global.Runner.TerminateAll()
+	global.Runner.Wait()
 
 	log.Println("Done!")
 }

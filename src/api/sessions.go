@@ -46,8 +46,8 @@ func SessionByToken(params martini.Params, enc encoder.Encoder) (int, []byte) {
 func CreateSession(params martini.Params, enc encoder.Encoder, req *http.Request) (int, []byte) {
 	decoder := json.NewDecoder(req.Body)
 	var t struct {
-		ProfileName   string            `json:"profile"`
-		DynamicParams map[string]string `json:"params"` // not those params that are in profile! these are different!
+		ProfileName string            `json:"profile"`
+		Params      map[string]string `json:"params"` // not those params that are in profile! these are different!
 	}
 	if err := decoder.Decode(&t); err != nil {
 		log.Println(err)
@@ -61,7 +61,7 @@ func CreateSession(params martini.Params, enc encoder.Encoder, req *http.Request
 		return http.StatusInternalServerError, []byte("Unable to locate profile")
 	}
 
-	session, err := session.Create(profile)
+	session, err := session.Create(profile, t.Params)
 	if err != nil {
 		log.Println(err)
 		return http.StatusInternalServerError, []byte("Unable to create session")
@@ -75,7 +75,10 @@ func CreateSession(params martini.Params, enc encoder.Encoder, req *http.Request
 
 	log.Printf("api: session created and registered (token %q)", token)
 
-	go session.Run()
+	if err := global.Runner.Go(session); err != nil {
+		log.Println(err)
+		return http.StatusInternalServerError, []byte("Unable to run session")
+	}
 
 	result := struct {
 		Token string `json:"token"`

@@ -74,12 +74,10 @@ func (l *localExecDriver) Start() error {
 	return nil
 }
 
-func (l *localExecDriver) Terminate() error {
-	log.Printf("localexec: terminate called")
-	errch := make(chan error)
+func (l *localExecDriver) Terminate() <-chan error {
+	errch := make(chan error, 1)
 	l.termch <- errch
-	err := <-errch
-	return err
+	return errch
 }
 
 func (l *localExecDriver) State() state.Type {
