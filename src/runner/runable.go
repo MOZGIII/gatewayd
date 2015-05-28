@@ -5,3 +5,6 @@ package runner
 type Runable interface {
 	Run(closech <-chan struct{})
 }
+
+// RunFunc is the type for Runable.Run function.
+type RunFunc func(closech <-chan struct{})

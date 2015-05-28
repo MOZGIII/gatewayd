@@ -8,9 +8,10 @@ import (
 
 // Runner runs and manages runables.
 type Runner interface {
-	Go(runable Runable) error // executes runable in a separate goroutine
-	TerminateAll()            // send all maanged runables command to terminate
-	Wait()                    // executes when all runables are finished execution
+	Run(runable Runable) error // executes passed Runable in a separate goroutine
+	Go(run RunFunc) error      // executes passed RunFunc in a separate goroutine
+	TerminateAll()             // send all maanged runables command to terminate
+	Wait()                     // executes when all runables are finished execution
 }
 
 type runner struct {
@@ -18,7 +19,11 @@ type runner struct {
 	wg      sync.WaitGroup
 }
 
-func (r *runner) Go(runable Runable) error {
+func (r *runner) Run(runable Runable) error {
+	return r.Go(runable.Run)
+}
+
+func (r *runner) Go(run RunFunc) error {
 	select {
 	case <-r.closech:
 		// Got value on `closech`, which
@@ -34,11 +39,11 @@ func (r *runner) Go(runable Runable) error {
 	go func() {
 		defer func() {
 			r.wg.Done()
-			log.Printf("runable: job finished %v", runable)
+			log.Printf("runable: job finished %v", run)
 		}()
-		runable.Run(r.closech)
+		run(r.closech)
 	}()
-	log.Printf("runable: job started %v", runable)
+	log.Printf("runable: job started %v", run)
 	return nil
 }
 

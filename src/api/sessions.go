@@ -75,7 +75,7 @@ func CreateSession(params martini.Params, enc encoder.Encoder, req *http.Request
 
 	log.Printf("api: session created and registered (token %q)", token)
 
-	if err := global.Runner.Go(session); err != nil {
+	if err := global.Runner.Run(session); err != nil {
 		log.Println(err)
 		return http.StatusInternalServerError, []byte("Unable to run session")
 	}
