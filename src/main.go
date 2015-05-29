@@ -7,8 +7,8 @@ import (
 
 	"gatewayd/driver"
 
-	"gatewayd/backend/global"
 	"gatewayd/config"
+	"gatewayd/global"
 	"gatewayd/server"
 	"gatewayd/utils"
 

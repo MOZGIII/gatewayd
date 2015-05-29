@@ -1,9 +1,9 @@
 package global
 
 import (
-	"gatewayd/backend/profile"
-	"gatewayd/backend/session"
+	"gatewayd/profile"
 	"gatewayd/runner"
+	"gatewayd/session"
 )
 
 // Store some stuff globally.

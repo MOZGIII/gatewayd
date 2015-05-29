@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"gatewayd/backend/global"
+	"gatewayd/global"
 )
 
 // Handler is dispatched for every tunnel connection. It validates

@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"gatewayd/backend/global"
-	"gatewayd/backend/session"
+	"gatewayd/global"
+	"gatewayd/session"
 
 	"gatewayd/pkg/encoder"
 	"github.com/go-martini/martini"

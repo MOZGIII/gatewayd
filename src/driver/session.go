@@ -1,7 +1,7 @@
 package driver
 
 import (
-	"gatewayd/backend/profile"
+	"gatewayd/profile"
 )
 
 // Session is an interface that drivers use to

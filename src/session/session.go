@@ -1,8 +1,8 @@
 package session
 
 import (
-	"gatewayd/backend/profile"
 	"gatewayd/driver"
+	"gatewayd/profile"
 )
 
 // Session stores internal session information.
