@@ -8,7 +8,7 @@ import (
 
 // Store some stuff globally.
 var (
-	SessionManager = *session.NewManager()
-	ProfileManager = *profile.NewManager()
-	Runner         = runner.NewRunner()
+	SessionRegistry = *session.NewRegistry()
+	ProfileManager  = *profile.NewManager()
+	Runner          = runner.NewRunner()
 )

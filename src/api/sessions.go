@@ -23,7 +23,7 @@ func SessionByToken(params martini.Params, enc encoder.Encoder) (int, []byte) {
 	}
 	log.Printf("api: requesting session info for token %q", token)
 
-	session, err := global.SessionManager.SessionByToken(token)
+	session, err := global.SessionRegistry.SessionByToken(token)
 	if err != nil {
 		log.Println(err)
 		return http.StatusNotFound, []byte("No such session")
@@ -67,7 +67,7 @@ func CreateSession(params martini.Params, enc encoder.Encoder, req *http.Request
 		return http.StatusInternalServerError, []byte("Unable to create session")
 	}
 
-	token, err := global.SessionManager.Manage(session)
+	token, err := global.SessionRegistry.Manage(session)
 	if err != nil {
 		log.Println(err)
 		return http.StatusInternalServerError, []byte("Unable to register session")
@@ -94,7 +94,7 @@ func DeleteSession(params martini.Params, enc encoder.Encoder) (int, []byte) {
 	}
 	log.Printf("api: requesting session deletion for token %q", token)
 
-	session, err := global.SessionManager.SessionByToken(token)
+	session, err := global.SessionRegistry.SessionByToken(token)
 	if err != nil {
 		log.Println(err)
 		return http.StatusNotFound, []byte("No such session")

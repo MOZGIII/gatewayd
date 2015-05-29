@@ -25,7 +25,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("tunnel: new tunnel connection with token %q from %s", token, r.RemoteAddr)
 
-	session, err := global.SessionManager.SessionByToken(token)
+	session, err := global.SessionRegistry.SessionByToken(token)
 	if err != nil {
 		log.Println(err)
 		log.Printf("tunnel: blocked access attempt with invalid token %q", token)
