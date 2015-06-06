@@ -6,7 +6,7 @@ import (
 )
 
 // Session stores internal session information.
-// Session does not know it's token, only manager does.
+// Session does not know it's token, only registry does.
 type Session struct {
 	profile *profile.Profile  // profile defines session settings
 	driver  driver.Driver     // driver does the actual work
@@ -15,7 +15,7 @@ type Session struct {
 	tunnelsCount    uint32    // total amount of tunnels currently using this session
 	tunnelBalanceCh chan bool // channel to keep tunnels balance with (true = +1, false = -1)
 
-	donech chan struct{} // used by session manager to unregister session
+	donech chan struct{} // used by session registry to unregister session
 }
 
 // New makes a new session struct.
