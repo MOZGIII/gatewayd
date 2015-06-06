@@ -20,12 +20,6 @@ func NewWebsocketProxy(ws *websocket.Conn, other net.Conn) *WebsocketProxy {
 	return &p
 }
 
-func vclose(who string, err error) {
-	if err != nil {
-		log.Println("Close error", who, err.Error())
-	}
-}
-
 func (p *WebsocketProxy) doProxy() {
 	defer p.other.Close()
 	defer p.ws.Close()
