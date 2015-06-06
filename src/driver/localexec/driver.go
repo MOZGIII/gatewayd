@@ -8,6 +8,7 @@ import (
 	"net"
 	"os/exec"
 	"sync"
+	"syscall"
 
 	"gatewayd/driver"
 	"gatewayd/driver/state"
@@ -203,10 +204,11 @@ func (l *localExecDriver) terminate() error {
 		return nil
 	}
 
-	// Kill triggers process exit, result will be propagated to Wait call.
-	if err := l.cmd.Process.Kill(); err != nil {
+	// SIGTERM triggers process exit, result will be propagated to Wait call.
+	if err := l.cmd.Process.Signal(syscall.SIGTERM); err != nil {
 		return err
 	}
+	log.Printf("localexec: sent SIGTERM to process %d", l.cmd.Process.Pid)
 
 	// We are stopping now.
 	l.changeState(state.Stopping)
