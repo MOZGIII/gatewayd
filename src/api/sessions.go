@@ -102,7 +102,8 @@ func DeleteSession(params martini.Params, enc encoder.Encoder) (int, []byte) {
 		return http.StatusNotFound, []byte("No such session")
 	}
 
-	if err := session.Driver().Terminate(); err != nil {
+	errch := session.Driver().Terminate()
+	if err := <-errch; err != nil {
 		log.Println(err)
 		return http.StatusInternalServerError, []byte("Unable to terminate session")
 	}
