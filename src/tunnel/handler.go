@@ -37,7 +37,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		log.Printf("tunnel: remote connection not ready for %q", token)
-		http.Error(w, "Remote connection not ready", 412)
+		http.Error(w, "Remote connection not ready", 503)
 		return
 	}
 
