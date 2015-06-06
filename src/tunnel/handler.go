@@ -41,8 +41,24 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = Tunnel(w, r, conn); err != nil {
-		log.Println("FAIL (tunnel):", err.Error())
+	log.Printf("New tunnel for %s to %s", r.RemoteAddr, conn.RemoteAddr())
+
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		log.Printf("tunnel: remote connection not ready for %q", token)
+		// upgrader have already sent http error down the line
 		return
 	}
+	// from now on, `w` is hijacked!
+
+	tch := session.TunnelBalanceChannel()
+	proxy := NewWebsocketProxy(ws, conn)
+	go func() {
+		defer func() {
+			tch <- false // decrement tunnels counter
+		}()
+		proxy.doProxy() // do proxy handles connection closing
+	}()
+	tch <- true // increment tunnels counter
 }

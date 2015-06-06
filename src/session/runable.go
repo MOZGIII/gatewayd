@@ -46,6 +46,12 @@ loop:
 			// and go on to wait for the state to become stopped.
 			log.Printf("session: shutting down gracefully (session %v)", s)
 			s.driver.Terminate()
+		case change := <-s.tunnelBalanceCh:
+			if change {
+				s.tunnelsCount++
+			} else {
+				s.tunnelsCount--
+			}
 		}
 	}
 }

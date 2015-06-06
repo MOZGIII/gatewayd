@@ -30,11 +30,13 @@ func SessionByToken(params martini.Params, enc encoder.Encoder) (int, []byte) {
 	}
 
 	info := struct {
-		State       string `json:"state"`
-		ProfileName string `json:"profile"`
+		State        string `json:"state"`
+		ProfileName  string `json:"profile"`
+		TunnelsCount uint32 `json:"tunnels_count"`
 	}{
 		session.Driver().State().String(),
 		session.Profile().Name,
+		session.TunnelsCount(),
 	}
 	return http.StatusOK, encoder.Must(enc.Encode(info))
 }

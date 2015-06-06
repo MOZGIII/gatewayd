@@ -12,6 +12,9 @@ type Session struct {
 	driver  driver.Driver     // driver does the actual work
 	params  map[string]string // params are passed on session creation
 
+	tunnelsCount    uint32    // total amount of tunnels currently using this session
+	tunnelBalanceCh chan bool // channel to keep tunnels balance with (true = +1, false = -1)
+
 	donech chan struct{} // used by session manager to unregister session
 }
 
@@ -19,6 +22,7 @@ type Session struct {
 func New(profile *profile.Profile, driver driver.Driver, params map[string]string) *Session {
 	return &Session{
 		profile, driver, params,
+		0, make(chan bool),
 		make(chan struct{}),
 	}
 }
@@ -49,4 +53,15 @@ func (s *Session) Profile() *profile.Profile {
 // Params returns session params.
 func (s *Session) Params() map[string]string {
 	return s.params
+}
+
+// TunnelsCount returns current tunnels count for this session.
+func (s *Session) TunnelsCount() uint32 {
+	return s.tunnelsCount
+}
+
+// TunnelBalanceChannel returns channel to be used to keep tunnels balance.
+// Bool type, so true = +1, false = -1.
+func (s *Session) TunnelBalanceChannel() chan<- bool {
+	return s.tunnelBalanceCh
 }
