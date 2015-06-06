@@ -5,8 +5,8 @@ import (
 	"os"
 )
 
-// ServerEndpoint is used by config to set
-// addresses and SSL settings
+// ServerEndpoint is used by config to set addresses
+// and SSL settings.
 type ServerEndpoint struct {
 	Addr string `json:"addr"`
 
@@ -15,13 +15,13 @@ type ServerEndpoint struct {
 	SSLCertFile string `json:"ssl_certfile"`
 }
 
-// Config is sotred as JSON and used to set some settings
+// Config is stored as JSON and used for app settings.
 type Config struct {
 	PublicEndpoint  ServerEndpoint `json:"public_endpoint"`
 	ServiceEndpoint ServerEndpoint `json:"service_endpoint"`
 }
 
-// LoadConfig load configuration from json file
+// LoadConfig loads configuration from JSON file.
 func LoadConfig(filename string) (*Config, error) {
 	reader, err := os.Open(filename)
 	if err != nil {
@@ -38,7 +38,7 @@ func LoadConfig(filename string) (*Config, error) {
 	return &config, nil
 }
 
-// MustLoadConfig calls LoadConfig and makes it a must-success
+// MustLoadConfig calls LoadConfig and makes it a must-success.
 func MustLoadConfig(filename string) (config *Config) {
 	config, err := LoadConfig(filename)
 	if err != nil {
