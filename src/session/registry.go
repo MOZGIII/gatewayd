@@ -16,8 +16,8 @@ func NewRegistry() *Registry {
 	return &Registry{tokenmap.New()}
 }
 
-// Manage registeres session immediately and manages session unregistration
-// upon it's termination.
+// Manage registeres session immediately and manages session
+// unregistration upon it's termination.
 func (s *Registry) Manage(session *Session) (string, error) {
 	token, err := s.Register(session)
 	if err != nil {
