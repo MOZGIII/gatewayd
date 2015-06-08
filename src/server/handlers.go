@@ -11,8 +11,8 @@ import (
 	"github.com/go-martini/martini"
 )
 
-// NewPublicHander creates a handler with public-faced services
-// There are WebSocket tunnel and public APIs
+// NewPublicHander creates a handler with public-faced services.
+// There are WebSocket tunnel and public APIs.
 func NewPublicHander() http.Handler {
 	handler := http.NewServeMux()
 
@@ -21,8 +21,8 @@ func NewPublicHander() http.Handler {
 	return handler
 }
 
-// NewServiceHander created a handler with private-faced services
-// These are mostly internal APIs
+// NewServiceHander created a handler with private-faced services.
+// These are internal APIs.
 func NewServiceHander() http.Handler {
 	m := buildMartini()
 

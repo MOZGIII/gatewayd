@@ -43,8 +43,8 @@ func SessionByToken(params martini.Params, enc encoder.Encoder) (int, []byte) {
 
 // CreateSession creates a new session and returns it's data.
 // With this API call, you should be able to ...
-// When this call returns, session is just set to be spawning and may not
-// be done with spawning yet (so it may be unconnectable).
+// When this call returns, session is just set to be spawning and
+// may not be done with spawning yet (so it may be unconnectable).
 func CreateSession(params martini.Params, enc encoder.Encoder, req *http.Request) (int, []byte) {
 	decoder := json.NewDecoder(req.Body)
 	var t struct {
