@@ -6,13 +6,19 @@ import (
 	"os"
 
 	"gatewayd/driver"
+	"gatewayd/policy"
 
 	"gatewayd/config"
 	"gatewayd/global"
 	"gatewayd/server"
 	"gatewayd/utils"
 
+	// Load drivers
 	_ "gatewayd/driver/localexec"
+
+	// Load policies
+	_ "gatewayd/policy/sessionmanagement/noop"
+	_ "gatewayd/policy/tunnelaccess/noop"
 )
 
 var (
@@ -52,6 +58,12 @@ func main() {
 
 	// Load external configuration files.
 	loadConfiguration()
+
+	// Initialize policies with the loaded config.
+	log.Println("main: initializing policies...")
+	if err := policy.LoadFromConfig(&currentConfig.Policies); err != nil {
+		log.Fatalf("main: unable to load policies: %s", err)
+	}
 
 	// Report on loaded profiles.
 	global.ProfileManager.Report()

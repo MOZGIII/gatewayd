@@ -15,10 +15,18 @@ type ServerEndpoint struct {
 	SSLCertFile string `json:"ssl_certfile"`
 }
 
+// PolicyConfig is be used by config to load policies
+// configuration.
+type PolicyConfig struct {
+	SessionManagementPolicyName string `json:"session_management"`
+	TunnelAccessPolicyName      string `json:"tunnel_access"`
+}
+
 // Config is stored as JSON and used for app settings.
 type Config struct {
 	PublicEndpoint  ServerEndpoint `json:"public_endpoint"`
 	ServiceEndpoint ServerEndpoint `json:"service_endpoint"`
+	Policies        PolicyConfig   `json:"policies"`
 }
 
 // LoadConfig loads configuration from JSON file.

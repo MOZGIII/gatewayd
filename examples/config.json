@@ -10,5 +10,9 @@
     "ssl_enabled":  false,
     "ssl_keyfile":  "service.key",
     "ssl_certfile": "service.crt"
+  },
+  "policies": {
+    "session_management": "noop",
+    "tunnel_access": "noop"
   }
 }
