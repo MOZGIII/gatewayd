@@ -8,6 +8,7 @@ This is a core part of a bigger project designed in a service-oriented manner.
 Development is not active anymore (for now).
 The project is more or less usable, however there are some missing parts here and there.
 If you would like to use it production - contact me, I'll guide you through.
+Licensed under GPLv2.
 
 ## Purpose
 
