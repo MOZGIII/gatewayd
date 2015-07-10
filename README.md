@@ -41,7 +41,7 @@ See further usage instructions in the provided help message (`go run main.go -he
 
 ## Credits
 
-Designed and implemented by MOZGIII (https://github.com/MOZGIII), review and assistance by Alexey Vereshchagin.
+Designed and implemented by MOZGIII (https://github.com/MOZGIII), review and assistance by Aleksey Vereshchagin (https://github.com/AlekseyVereshchagin).
 
 ## Contributing
 
